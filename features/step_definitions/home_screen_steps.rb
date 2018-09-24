@@ -10,10 +10,12 @@ end
 
 
 Then(/^Show All button should be (enabled|disabled)$/) do |state|
-  if state == "enabled"
-    puts("button is enabled")
-  elsif state == "disabled"
-    puts("button is disabled")
+  button_state = find_element(id: "btn_show_all").enabled?
+  case
+    when state == "enabled"
+      expect(button_state).to be true
+    when state == "disabled"
+      expect(button_state).to be false
   end
 end
 
@@ -23,9 +25,7 @@ end
 
 When(/^I type "([^"]*)" on application keyboard$/) do |target|
   digits = target.split("")
-  digits.each do |num|
-   find_element(id: "keypad").find_element(xpath: "//android.widget.Button[@text='#{num}']").click
-  end
+  digits.map {|num| find_element(id: "keypad").find_element(xpath: "//android.widget.Button[@text='#{num}']").click }
 end
 
 Then(/^I should see result as "([^"]*)"$/) do |result|
@@ -43,7 +43,8 @@ Then(/^I press on favorite conversions$/) do
 end
 
 And(/^I verify "([^"]*)" added to favorite conversions lists$/) do |unit_type|
-  text(unit_type)
+  item_text = find_element(id: "favorites_item_hint").text
+  expect(unit_type).to eq(item_text)
 end
 
 
@@ -64,3 +65,38 @@ Then(/^I see "([^"]*)" as a current unit converter$/) do |current_unit|
 end
 
 
+Then(/^I select "([^"]*)" from left unit picker$/) do |value|
+  find_elements(id: "select_unit_spinner")[0].click
+  find_in_list(value)
+end
+
+Then(/^I select "([^"]*)" from menu$/) do |value|
+  text(value).click
+end
+
+Then(/^I select "([^"]*)" from right unit picker$/) do |value|
+  find_elements(id: "select_unit_spinner")[1].click
+  find_in_list(value)
+end
+
+
+When(/^I press on switch units button$/) do
+  find_element(id: "img_switch").click
+end
+
+Then(/^I should see text "([^"]*)"$/) do |value|
+  text(value)
+end
+
+And(/^I verify that (\d+)(?:st|nd|rd|th)? result in history list is "([^"]*)"$/) do |index, text|
+  parent_element = find_element(id: "history_conversions_list")
+  array_of_elements = parent_element.find_elements(id: "history_single_line")
+  actual_text = array_of_elements[index.to_i - 1].find_element(id: "history_item_hint")
+  expect(actual_text).to eq(text)
+end
+
+When(/^I press delete from history at 1st row$/) do |index|
+  parent_element = find_element(id: "history_conversions_list")
+  array_of_elements = parent_element.find_elements(id: "history_single_line")
+  array_of_elements[index.to_i - 1].find_element(id: "deleteicon").click
+end

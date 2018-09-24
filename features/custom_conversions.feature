@@ -1,5 +1,5 @@
+@custom_conversions
 Feature: User able to create and manage custom conversions
-
   Scenario: User able to create new conversion
     Given I land on home screen
     Then I press on Menu icon
